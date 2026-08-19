@@ -1,0 +1,24 @@
+{
+  "modpacks": [
+    {
+      "id": "pack_cobblemon",
+      "name": "Aventure Cobblemon",
+      "version": "1.0.0",
+      "minecraft": "1.21.1",
+      "loader": "fabric",
+      "loader_version": "0.18.4",
+      "description": "Attrapez-les tous dans Minecraft ! Modpack basé sur Cobblemon pour le serveur.",
+      "icon_url": "https://raw.githubusercontent.com/PoiBoy34/Launcher_cobblemon/main/assets/pack-icons/cobblemon.png",
+      "background_url": "https://raw.githubusercontent.com/PoiBoy34/Launcher_cobblemon/main/assets/pack-backgrounds/cobblemon.png",
+      "manifest_url": "https://raw.githubusercontent.com/PoiBoy34/Launcher_cobblemon/main/modpacks/Cobblemon/manifest.json",
+      "datapacks_manifest_url": "https://raw.githubusercontent.com/PoiBoy34/Launcher_cobblemon/main/modpacks/Cobblemon/datapacks_manifest.json",
+      "shaderpacks_manifest_url": "https://raw.githubusercontent.com/PoiBoy34/Launcher_cobblemon/main/modpacks/Cobblemon/shaderpacks_manifest.json",
+      "resourcepacks_manifest_url": "https://raw.githubusercontent.com/PoiBoy34/Launcher_cobblemon/main/modpacks/Cobblemon/resourcepacks_manifest.json",
+      "servers_dat_url": "https://raw.githubusercontent.com/PoiBoy34/Launcher_cobblemon/main/modpacks/Cobblemon/servers.dat",
+      "defaults_url": "https://raw.githubusercontent.com/PoiBoy34/Launcher_cobblemon/main/modpacks/Cobblemon/defaults.zip",
+      "defaults_sha1": "4d482a77399464a440d6d8cb0a5a03e80d45bd2d",
+      "server_host": "cobblemon.mekhorizon.org:25565",
+      "voice_test": "nih-barefoot.tun.ply.gg:1059"
+    }
+  ]
+}
