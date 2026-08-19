@@ -112,16 +112,6 @@
   .banner-btn:disabled { opacity: 0.5; cursor: not-allowed; }
   .banner-close { background: none; border: none; color: #ccc; cursor: pointer; font-size: 14px; padding: 0 4px; }
   .banner-close:hover { color: #fff; }
-
-  /* --- Ajouts : état serveur, aide RAM, bouton en jeu --- */
-  #server-pill { display: flex; align-items: center; gap: 6px; font-size: 11px; color: #9ca3af; margin-top: 3px; }
-  #server-dot { width: 7px; height: 7px; border-radius: 50%; background: #6b7280; flex-shrink: 0; }
-  #server-dot.online { background: #4ade80; animation: pulse 2.4s infinite; }
-  #ram-hint { font-size: 11px; color: #9ca3af; margin-top: 8px; line-height: 1.45; }
-  #ram-hint.warn { color: #fbbf24; }
-  #play-btn.ingame { background: rgba(74,222,128,0.16) !important; color: #86efac !important; animation: none; }
-  .folder-btn.logout { background: rgba(239,68,68,0.1); border-color: rgba(239,68,68,0.3); color: #fca5a5; }
-  .folder-btn.logout:hover { background: rgba(239,68,68,0.2); }
 </style>
 </head>
 <body>
@@ -147,7 +137,6 @@
           <input type="range" id="ram-slider" min="2" max="16" step="1" value="4">
           <div class="ram-value"><span id="ram-display">4</span> <span data-i18n="ramUnit">Go</span></div>
         </div>
-        <div id="ram-hint"></div>
       </div>
 
       <div class="settings-section">
@@ -218,9 +207,6 @@
         <button class="folder-btn update-check" id="btn-check-update">
           <span class="folder-icon">🔄</span><span class="lbl" data-i18n="checkUpdate">Vérifier les mises à jour</span>
         </button>
-        <button class="folder-btn logout" id="btn-logout">
-          <span class="folder-icon">🚪</span><span class="lbl" data-i18n="logoutBtn">Se déconnecter de Microsoft</span>
-        </button>
         <div id="update-status"></div>
       </div>
     </div>
@@ -258,9 +244,6 @@
         <div>
           <div id="sel-name" data-i18n="noPackName">Aucun modpack sélectionné</div>
           <div id="sel-meta" data-i18n="noPackMeta">Choisissez un modpack ci-dessus</div>
-          <div id="server-pill">
-            <span id="server-dot"></span><span id="server-state" data-i18n="serverChecking">Vérification du serveur...</span>
-          </div>
         </div>
         <div id="launcher-version-tag"></div>
       </div>
@@ -293,22 +276,7 @@
       playLogin: 'CONNECTEZ-VOUS POUR JOUER',
       playPlay: 'JOUER — ',
       playSyncing: 'SYNCHRONISATION...',
-      playLaunching: 'DÉMARRAGE DE MINECRAFT...',
-      playInGame: 'EN JEU',
       verifyingMods: 'Vérification des mods...',
-      serverChecking: 'Vérification du serveur...',
-      serverOnline: (n, max) => 'Serveur en ligne — ' + n + '/' + max + ' joueurs',
-      serverOffline: 'Serveur hors ligne',
-      serverUnknown: 'Serveur injoignable',
-      ramHint: (used, total, max) => used + ' Go sur ' + total + ' Go détectés. Maximum conseillé : ' + max + ' Go.',
-      ramHintHigh: (max) => 'Au-delà de ' + max + ' Go il ne reste plus assez de mémoire pour ton système : le jeu planterait au démarrage.',
-      ramClamped: (asked, used) => 'Mémoire ramenée de ' + asked + ' à ' + used + ' Go, ta machine ne peut pas suivre.',
-      gameReady: 'Minecraft tourne. Tu peux laisser le launcher ouvert.',
-      gameClosed: (d) => 'Session terminée après ' + d + '. Prêt à repartir.',
-      gameClosedShort: 'Jeu fermé. Prêt à repartir.',
-      logoutBtn: 'Se déconnecter de Microsoft',
-      confirmLogout: 'Te déconnecter de ce compte Microsoft ? Tes mondes et tes mods restent intacts.',
-      loggedOut: 'Déconnecté. Reconnecte-toi pour jouer.',
       settingsTitle: 'Paramètres',
       ramLabel: 'Mémoire RAM allouée',
       ramUnit: 'Go',
@@ -365,22 +333,7 @@
       playLogin: 'LOG IN TO PLAY',
       playPlay: 'PLAY — ',
       playSyncing: 'SYNCING...',
-      playLaunching: 'STARTING MINECRAFT...',
-      playInGame: 'IN GAME',
       verifyingMods: 'Checking mods...',
-      serverChecking: 'Checking server...',
-      serverOnline: (n, max) => 'Server online — ' + n + '/' + max + ' players',
-      serverOffline: 'Server offline',
-      serverUnknown: 'Server unreachable',
-      ramHint: (used, total, max) => used + ' GB of ' + total + ' GB detected. Recommended maximum: ' + max + ' GB.',
-      ramHintHigh: (max) => 'Above ' + max + ' GB there is not enough memory left for your system: the game would crash on startup.',
-      ramClamped: (asked, used) => 'Memory reduced from ' + asked + ' to ' + used + ' GB, your machine cannot handle more.',
-      gameReady: 'Minecraft is running. You can leave the launcher open.',
-      gameClosed: (d) => 'Session ended after ' + d + '. Ready to go again.',
-      gameClosedShort: 'Game closed. Ready to go again.',
-      logoutBtn: 'Sign out of Microsoft',
-      confirmLogout: 'Sign out of this Microsoft account? Your worlds and mods stay untouched.',
-      loggedOut: 'Signed out. Sign in again to play.',
       settingsTitle: 'Settings',
       ramLabel: 'Allocated RAM',
       ramUnit: 'GB',
@@ -434,9 +387,6 @@
   let isLoggedIn = false;
   let loginState = 'checking'; // checking | connecting | login | retry
   let ramValue = parseInt(localStorage.getItem('ram') || '4');
-  let playState = 'idle';      // idle | syncing | launching | ingame
-  let sysInfo = { totalRamGb: 8, maxRamGb: 6, recommendedRamGb: 4, freeDiskGb: 0 };
-  let serverTimer = null;
 
   let autoSyncStored = localStorage.getItem('autoSync');
   let autoSync = autoSyncStored === null ? true : autoSyncStored === 'true';
@@ -463,8 +413,6 @@
     });
 
     refreshDynamicTexts();
-    renderRamHint();
-    refreshServer();
   }
 
   // Re-rend les textes qui dépendent de l'état (login, play, pack sélectionné).
@@ -495,44 +443,12 @@
   // ===========================================================================
   // RAM
   // ===========================================================================
-  function renderRamHint() {
-    const hint = document.getElementById('ram-hint');
-    if (!hint) return;
-    const high = ramValue >= sysInfo.maxRamGb;
-    hint.textContent = high ? L().ramHintHigh(sysInfo.maxRamGb)
-                            : L().ramHint(ramValue, sysInfo.totalRamGb, sysInfo.maxRamGb);
-    hint.classList.toggle('warn', high);
-  }
-
-  // Allouer plus de mémoire que la machine n'en possède fait planter la JVM
-  // au démarrage : on borne le curseur sur le matériel réel.
-  function applyRam(value) {
-    ramValue = Math.max(2, Math.min(parseInt(value) || 4, sysInfo.maxRamGb));
-    document.getElementById('ram-slider').value = ramValue;
-    document.getElementById('ram-display').textContent = ramValue;
-    localStorage.setItem('ram', ramValue);
-    renderRamHint();
-  }
-
   document.getElementById('ram-slider').value = ramValue;
   document.getElementById('ram-display').textContent = ramValue;
-  document.getElementById('ram-slider').addEventListener('input', (e) => applyRam(e.target.value));
-
-  window.api.getSystemInfo().then(info => {
-    sysInfo = info;
-    const slider = document.getElementById('ram-slider');
-    slider.min = 2;
-    slider.max = info.maxRamGb;
-    applyRam(Math.min(ramValue, info.maxRamGb));
-  }).catch(() => renderRamHint());
-
-  window.api.onRamClamped((d) => {
-    sysInfo.maxRamGb = d.maxRamGb;
-    sysInfo.totalRamGb = d.totalRamGb;
-    applyRam(d.used);
-    const log = document.getElementById('sync-log');
-    log.textContent = L().ramClamped(d.asked, d.used);
-    log.style.color = '#fbbf24';
+  document.getElementById('ram-slider').addEventListener('input', (e) => {
+    ramValue = parseInt(e.target.value);
+    document.getElementById('ram-display').textContent = ramValue;
+    localStorage.setItem('ram', ramValue);
   });
 
   // ===========================================================================
@@ -547,16 +463,22 @@
 
   // Bouton "Synchroniser maintenant" : force une vraie synchro à la demande.
   document.getElementById('btn-sync-now').addEventListener('click', () => {
-    if (!selectedPack || playState !== 'idle') return;
-    document.getElementById('btn-sync-now').disabled = true;
-    setPlayState('syncing');
-    setLog(L().verifyingMods);
+    if (!selectedPack) return;
+    const b = document.getElementById('btn-sync-now');
+    b.disabled = true;
+    document.getElementById('sync-log').style.color = '#6b7280';
+    document.getElementById('sync-log').textContent = L().verifyingMods;
     window.api.syncNow({ ...selectedPack });
   });
 
   window.api.onSyncDone(() => {
     document.getElementById('btn-sync-now').disabled = false;
-    if (playState === 'syncing') setPlayState('idle');
+    const btn = document.getElementById('play-btn');
+    // Si on n'est pas en plein lancement, on remet le bouton play dans son état normal.
+    if (btn.classList.contains('syncing')) {
+      btn.classList.remove('syncing');
+      updatePlayBtn();
+    }
   });
 
   // ===========================================================================
@@ -747,9 +669,6 @@
     document.getElementById('sel-meta').textContent = L().selMeta(pack);
     setBackground(pack.background_url);
     updatePlayBtn();
-    refreshServer();
-    if (serverTimer) clearInterval(serverTimer);
-    serverTimer = setInterval(refreshServer, 60000);
   }
 
   // Change le fond selon le pack sélectionné (fondu).
@@ -763,54 +682,18 @@
     }, 250);
   }
 
-  function setPlayState(s) { playState = s; updatePlayBtn(); }
-
   function updatePlayBtn() {
     const btn = document.getElementById('play-btn');
-    const busy = playState === 'syncing' || playState === 'launching';
-    btn.classList.toggle('syncing', busy);
-    btn.classList.toggle('ingame', playState === 'ingame');
-
-    if (playState === 'syncing')        { btn.disabled = true;  btn.textContent = L().playSyncing; }
-    else if (playState === 'launching') { btn.disabled = true;  btn.textContent = L().playLaunching; }
-    else if (playState === 'ingame')    { btn.disabled = true;  btn.textContent = L().playInGame; }
-    else if (!isLoggedIn)               { btn.disabled = true;  btn.textContent = L().playLogin; }
-    else if (!selectedPack)             { btn.disabled = true;  btn.textContent = L().playSelect; }
-    else { btn.disabled = false; btn.textContent = L().playPlay + selectedPack.name.toUpperCase(); }
-  }
-
-  function formatDuration(ms) {
-    const total = Math.round((ms || 0) / 1000);
-    const h = Math.floor(total / 3600), m = Math.floor((total % 3600) / 60);
-    if (h > 0) return h + ' h ' + String(m).padStart(2, '0');
-    if (m > 0) return m + ' min';
-    return total + ' s';
-  }
-
-  function setLog(text, color) {
-    const log = document.getElementById('sync-log');
-    log.textContent = text || '';
-    log.style.color = color || '#6b7280';
-  }
-
-  // --- État du serveur multijoueur ---------------------------------------
-  async function refreshServer() {
-    if (!selectedPack) return;
-    const dot = document.getElementById('server-dot');
-    const state = document.getElementById('server-state');
-    if (!dot || !state) return;
-    try {
-      const s = await window.api.getServerStatus({ ...selectedPack });
-      if (s && s.online) {
-        dot.classList.add('online');
-        state.textContent = L().serverOnline(s.players.online, s.players.max);
-      } else {
-        dot.classList.remove('online');
-        state.textContent = (s && s.error === 'timeout') ? L().serverUnknown : L().serverOffline;
-      }
-    } catch (e) {
-      dot.classList.remove('online');
-      state.textContent = L().serverUnknown;
+    if (btn.classList.contains('syncing')) return; // ne pas écraser le texte pendant la synchro/lancement
+    if (selectedPack && isLoggedIn) {
+      btn.disabled = false;
+      btn.textContent = L().playPlay + selectedPack.name.toUpperCase();
+    } else if (!isLoggedIn) {
+      btn.disabled = true;
+      btn.textContent = L().playLogin;
+    } else {
+      btn.disabled = true;
+      btn.textContent = L().playSelect;
     }
   }
 
@@ -824,9 +707,13 @@
   });
 
   document.getElementById('play-btn').addEventListener('click', () => {
-    if (!selectedPack || playState !== 'idle' || !isLoggedIn) return;
-    setPlayState('syncing');
-    setLog(L().verifyingMods);
+    if (!selectedPack) return;
+    const btn = document.getElementById('play-btn');
+    btn.disabled = true;
+    btn.classList.add('syncing');
+    btn.textContent = L().playSyncing;
+    document.getElementById('sync-log').style.color = "#6b7280";
+    document.getElementById('sync-log').textContent = L().verifyingMods;
     window.api.launchGame({ ...selectedPack, ram: ramValue, autoSync });
   });
 
@@ -838,11 +725,9 @@
     updatePlayBtn();
   });
 
-  window.api.onAuthError((d) => {
+  window.api.onAuthError(() => {
     loginState = 'retry';
-    document.getElementById('login-btn').style.display = 'flex';
     renderLoginBtn();
-    if (d && d.message) setLog(d.message, '#ef4444');
   });
 
   window.api.onAuthMissing(() => {
@@ -864,46 +749,13 @@
   });
 
   window.api.onLaunchError((errorMsg) => {
-    setPlayState('idle');
-    document.getElementById('btn-sync-now').disabled = false;
-    document.getElementById('sync-bar').style.display = 'none';
-    setLog(errorMsg, '#ef4444');
-  });
-
-  // --- Cycle de vie du jeu ------------------------------------------------
-  window.api.onGameLaunching(() => {
-    setPlayState('launching');
-    document.getElementById('sync-bar').style.display = 'none';
-  });
-
-  window.api.onGameStarted(() => {
-    setPlayState('ingame');
-    setLog(L().gameReady, '#4ade80');
-  });
-
-  // Jeu fermé : le launcher revient exactement à son état d'ouverture.
-  window.api.onGameClosed((d) => {
-    setPlayState('idle');
-    document.getElementById('btn-sync-now').disabled = false;
-    document.getElementById('sync-bar').style.display = 'none';
-    if (d && d.crashed) setLog(d.hint || L().gameClosedShort, '#ef4444');
-    else if (d && d.durationMs > 5000) setLog(L().gameClosed(formatDuration(d.durationMs)), '#9ca3af');
-    else setLog(L().gameClosedShort, '#9ca3af');
-    refreshServer();
-  });
-
-  // --- Déconnexion --------------------------------------------------------
-  document.getElementById('btn-logout').addEventListener('click', async () => {
-    if (!confirm(L().confirmLogout)) return;
-    await window.api.logout();
-    isLoggedIn = false;
-    loginState = 'login';
-    document.getElementById('user-pill').style.display = 'none';
-    document.getElementById('login-btn').style.display = 'flex';
-    renderLoginBtn();
-    setPlayState('idle');
-    setLog(L().loggedOut, '#fbbf24');
-    document.getElementById('settings-panel').classList.remove('open');
+    const btn = document.getElementById('play-btn');
+    btn.classList.remove('syncing');
+    btn.disabled = false;
+    updatePlayBtn();
+    const log = document.getElementById('sync-log');
+    log.textContent = L().errPrefix(errorMsg);
+    log.style.color = "#ef4444";
   });
 
   // ===========================================================================
