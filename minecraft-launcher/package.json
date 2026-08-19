@@ -46,9 +46,11 @@
       "target": "AppImage",
       "category": "Game",
       "desktop": {
-        "Name": "Cobblemon Launcher",
-        "Categories": "Game;",
-        "StartupWMClass": "cobblemon-launcher"
+        "entry": {
+          "Name": "Cobblemon Launcher",
+          "Categories": "Game;",
+          "StartupWMClass": "cobblemon-launcher"
+        }
       },
       "icon": "build/icon.png"
     },
