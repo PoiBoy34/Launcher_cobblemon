@@ -119,6 +119,7 @@
   #server-dot.online { background: #4ade80; animation: pulse 2.4s infinite; }
   #ram-hint { font-size: 11px; color: #9ca3af; margin-top: 8px; line-height: 1.45; }
   #ram-hint.warn { color: #fbbf24; }
+  #ram-hint.danger { color: #ef4444; }
   #play-btn.ingame { background: rgba(74,222,128,0.16) !important; color: #86efac !important; animation: none; }
   .folder-btn.logout { background: rgba(239,68,68,0.1); border-color: rgba(239,68,68,0.3); color: #fca5a5; }
   .folder-btn.logout:hover { background: rgba(239,68,68,0.2); }
@@ -300,8 +301,9 @@
       serverOnline: (n, max) => 'Serveur en ligne — ' + n + '/' + max + ' joueurs',
       serverOffline: 'Serveur hors ligne',
       serverUnknown: 'Serveur injoignable',
-      ramHint: (used, total, max) => used + ' Go sur ' + total + ' Go détectés. Maximum conseillé : ' + max + ' Go.',
-      ramHintHigh: (max) => 'Au-delà de ' + max + ' Go il ne reste plus assez de mémoire pour ton système : le jeu planterait au démarrage.',
+      ramHint: (used, total, max) => used + ' Go sur ' + total + ' Go détectés. Conseillé jusqu’à ' + max + ' Go.',
+      ramHintDanger: 'Tu alloues toute la mémoire de ta machine. Le jeu risque de ne pas démarrer du tout.',
+      ramHintHigh: (max) => 'Au-delà de ' + max + ' Go, il reste peu de mémoire pour ton système. Si le jeu rame ou plante au démarrage, redescends.',
       ramClamped: (asked, used) => 'Mémoire ramenée de ' + asked + ' à ' + used + ' Go, ta machine ne peut pas suivre.',
       gameReady: 'Minecraft tourne. Tu peux laisser le launcher ouvert.',
       gameClosed: (d) => 'Session terminée après ' + d + '. Prêt à repartir.',
@@ -372,8 +374,9 @@
       serverOnline: (n, max) => 'Server online — ' + n + '/' + max + ' players',
       serverOffline: 'Server offline',
       serverUnknown: 'Server unreachable',
-      ramHint: (used, total, max) => used + ' GB of ' + total + ' GB detected. Recommended maximum: ' + max + ' GB.',
-      ramHintHigh: (max) => 'Above ' + max + ' GB there is not enough memory left for your system: the game would crash on startup.',
+      ramHint: (used, total, max) => used + ' GB of ' + total + ' GB detected. Recommended up to ' + max + ' GB.',
+      ramHintDanger: 'You are allocating all your machine memory. The game may not start at all.',
+      ramHintHigh: (max) => 'Above ' + max + ' GB there is little memory left for your system. If the game stutters or crashes on startup, lower it.',
       ramClamped: (asked, used) => 'Memory reduced from ' + asked + ' to ' + used + ' GB, your machine cannot handle more.',
       gameReady: 'Minecraft is running. You can leave the launcher open.',
       gameClosed: (d) => 'Session ended after ' + d + '. Ready to go again.',
@@ -498,10 +501,15 @@
   function renderRamHint() {
     const hint = document.getElementById('ram-hint');
     if (!hint) return;
-    const high = ramValue >= sysInfo.maxRamGb;
-    hint.textContent = high ? L().ramHintHigh(sysInfo.maxRamGb)
-                            : L().ramHint(ramValue, sysInfo.totalRamGb, sysInfo.maxRamGb);
+    const soft = sysInfo.recommendedMaxGb || Math.max(2, Math.floor(sysInfo.totalRamGb - 2));
+    // Trois paliers : conseillé, risqué, très risqué. On avertit sans interdire.
+    const danger = ramValue >= Math.floor(sysInfo.totalRamGb);
+    const high = !danger && ramValue > soft;
+    hint.textContent = danger ? L().ramHintDanger
+                     : high   ? L().ramHintHigh(soft)
+                              : L().ramHint(ramValue, sysInfo.totalRamGb, soft);
     hint.classList.toggle('warn', high);
+    hint.classList.toggle('danger', danger);
   }
 
   // Allouer plus de mémoire que la machine n'en possède fait planter la JVM
